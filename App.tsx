@@ -326,11 +326,12 @@ export default function App() {
     return match ? match[1] : null;
   };
 
-  // Checkout Logic - Updated to use postMessage for iframe communication
-  const handleCheckout = async () => {
+  // Checkout Logic - Updated to use Shopify Permalinks in new tab
+  // This bypasses iframe cross-origin issues and sends user to checkout with products
+  const handleCheckout = () => {
     setIsCheckingOut(true);
     
-    // 1. Prepare items for Shopify Cart (just IDs for the parent script)
+    // 1. Get Variant IDs
     const variantIds = pricedStrategies.map(s => {
         return s.infoUrl ? extractVariantId(s.infoUrl) : null;
     }).filter(id => id !== null);
@@ -341,27 +342,16 @@ export default function App() {
         return;
     }
 
-    try {
-        // 2. Send message to parent Shopify window
-        // The parent window must have the event listener to handle this:
-        // window.addEventListener('message', (e) => { if(e.data.type === 'ADD_TO_CART') ... })
-        window.parent.postMessage({
-            type: 'ADD_TO_CART',
-            variantIds: variantIds
-        }, '*');
+    // 2. Construct Shopify Cart Permalink
+    // Format: https://domain.com/cart/variant_id:qty,variant_id:qty
+    // This format replaces the cart with these items and goes to checkout/cart flow
+    const cartItems = variantIds.map(id => `${id}:1`).join(',');
+    const checkoutUrl = `https://setupalpha.com/cart/${cartItems}`;
 
-        // We reset the loading state after a delay because the parent window
-        // will ideally handle the redirect. If it doesn't, we stop spinning so
-        // the user knows something happened (or didn't).
-        setTimeout(() => {
-            setIsCheckingOut(false);
-        }, 3000);
-
-    } catch (error) {
-        console.error("Checkout signaling failed", error);
-        alert("There was an error proceeding to checkout. Please try again.");
-        setIsCheckingOut(false);
-    }
+    // 3. Open in new tab
+    window.open(checkoutUrl, '_blank');
+    
+    setIsCheckingOut(false);
   };
 
   return (
