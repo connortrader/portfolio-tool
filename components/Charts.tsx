@@ -161,7 +161,7 @@ export const EquityChart: React.FC<ChartProps> = ({ data, strategies, showSpy, i
                 hide={hiddenSeries.has('spy')}
                 type="monotone"
                 dataKey="spy"
-                name="SPY Benchmark"
+                name="SPY ETF"
                 stroke="#ef4444"
                 strokeWidth={2}
                 dot={false}
@@ -238,7 +238,7 @@ export const DrawdownChart: React.FC<{data: any[], showSpy: boolean}> = ({ data,
                         <Line 
                             type="monotone" 
                             dataKey="spyDD" 
-                            name="SPY Drawdown" 
+                            name="SPY ETF Drawdown" 
                             stroke="#dc2626" 
                             strokeWidth={1.5} 
                             dot={false} 
@@ -270,7 +270,7 @@ export const AnnualReturnsChart: React.FC<{portfolioReturns: Record<string, numb
     const data = years.map(year => ({
         year,
         Portfolio: (portfolioReturns[year] || 0) * 100,
-        SPY: (spyReturns[year] || 0) * 100
+        'SPY ETF': (spyReturns[year] || 0) * 100
     }));
 
     return (
@@ -300,10 +300,10 @@ export const AnnualReturnsChart: React.FC<{portfolioReturns: Record<string, numb
                         hide={hiddenSeries.has('Portfolio')}
                     />
                     <Bar 
-                        dataKey="SPY" 
+                        dataKey="SPY ETF" 
                         fill="#ef4444" 
                         radius={[4, 4, 0, 0]} 
-                        hide={hiddenSeries.has('SPY')}
+                        hide={hiddenSeries.has('SPY ETF')}
                     />
                 </BarChart>
             </ResponsiveContainer>

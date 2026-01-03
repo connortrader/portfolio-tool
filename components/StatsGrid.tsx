@@ -31,7 +31,7 @@ export const StatsGrid: React.FC<{ stats: PortfolioStats, spyStats: PortfolioSta
                         <tr>
                             <th className="px-4 py-3">Metric</th>
                             <th className="px-4 py-3 text-right text-slate-800">Portfolio</th>
-                            <th className="px-4 py-3 text-right text-slate-800">SPY Buy & Hold</th>
+                            <th className="px-4 py-3 text-right text-slate-800">SPY ETF</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
@@ -145,7 +145,7 @@ export const StressPeriodsTable: React.FC<{
                             <th className="p-3 border-b border-slate-200">Event</th>
                             <th className="p-3 border-b border-slate-200">Date Range</th>
                             <th className="p-3 border-b border-slate-200 text-right">Portfolio Max DD</th>
-                            <th className="p-3 border-b border-slate-200 text-right">SPY Max DD</th>
+                            <th className="p-3 border-b border-slate-200 text-right">SPY ETF Max DD</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">

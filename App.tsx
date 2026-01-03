@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { DollarSign, Info, ShoppingCart, HelpCircle, Loader2, Printer, BarChart2, ArrowRight, Check, Tag } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { DollarSign, Info, ShoppingCart, Loader2, BarChart2, ArrowRight, Check, Tag } from 'lucide-react';
 import { StrategyList } from './components/StrategyList';
 import { FileUpload } from './components/FileUpload';
 import { EquityChart, DrawdownChart, AnnualReturnsChart, AllocationPieChart } from './components/Charts';
@@ -9,9 +9,6 @@ import { Strategy, BUILT_IN_STRATEGIES, SPY_URL, SimulationResult } from './type
 
 // Initial Palette
 const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
-
-declare var html2canvas: any;
-declare var jspdf: any;
 
 export default function App() {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
@@ -33,8 +30,7 @@ export default function App() {
 
   const [spyData, setSpyData] = useState<Map<string, number> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isCapturing, setIsCapturing] = useState(false);
-  const reportRef = useRef<HTMLElement>(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   
   // Load initial data
   useEffect(() => {
@@ -324,112 +320,56 @@ export default function App() {
 
   const finalPrice = originalPrice * (1 - discount);
 
-  // EXPORT METHOD: PDF via Image Capture (Perfect quality)
-  const handleExportPDF = async () => {
-    if (!reportRef.current) return;
-    setIsCapturing(true);
+  // Helper to extract variant ID from info URL
+  const extractVariantId = (url: string) => {
+    const match = url.match(/[?&]variant=(\d+)/);
+    return match ? match[1] : null;
+  };
 
-    // Wait for UI to update (in case we hide/show elements)
-    await new Promise(r => setTimeout(r, 100));
-
-    const element = reportRef.current;
-    const originalWidth = element.style.width;
-    const originalMargin = element.style.margin;
-
-    // 1. Identify scrollable elements (tables like Correlation Matrix)
-    // We target 'overflow-x-auto' classes typically used for these tables
-    const scrollables = element.querySelectorAll('.overflow-x-auto');
-    const originalStyles: {el: Element, overflow: string, width: string}[] = [];
-
-    // 2. Expand scrollables to fit their content
-    scrollables.forEach((el) => {
-        const hEl = el as HTMLElement;
-        originalStyles.push({
-            el: hEl,
-            overflow: hEl.style.overflow,
-            width: hEl.style.width
-        });
-        hEl.style.overflow = 'visible';
-        // Force width to fit content so html2canvas sees it all
-        hEl.style.width = 'max-content'; 
-    });
-
-    // 3. Expand the main container if children are wider than 1000px
-    // We start with a base of 1000px for good chart resolution
-    let targetWidth = 1000;
+  // Checkout Logic
+  const handleCheckout = async () => {
+    setIsCheckingOut(true);
     
-    // Check if any expanded table is wider than 1000px (e.g. huge matrix)
-    scrollables.forEach((el) => {
-        if (el.scrollWidth > targetWidth) {
-            targetWidth = el.scrollWidth;
-        }
-    });
+    // 1. Prepare items for Shopify Cart
+    const itemsToBuy = pricedStrategies.map(s => {
+        const variantId = s.infoUrl ? extractVariantId(s.infoUrl) : null;
+        return {
+            id: variantId,
+            quantity: 1
+        };
+    }).filter(item => item.id); // Filter out strategies without variant ID
 
-    // Apply width to main container
-    element.style.width = `${targetWidth}px`; 
-    element.style.margin = '0'; // Reset margin for capture
-    
-    // 4. Wait for layout and Recharts to adapt
-    await new Promise(r => setTimeout(r, 1000));
+    if (itemsToBuy.length === 0) {
+        alert("No strategies available for purchase.");
+        setIsCheckingOut(false);
+        return;
+    }
 
     try {
-        if (typeof html2canvas !== 'undefined' && typeof jspdf !== 'undefined') {
-            const canvas = await html2canvas(element, { 
-                scale: 2, 
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                width: targetWidth, // Explicitly tell html2canvas the width
-                windowWidth: targetWidth // Important for media queries
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            
-            // 5. Create PDF with dimensions matching the canvas (Custom Size)
-            // This ensures no shrinking/squashing of large tables.
-            // 1 px = 0.264583 mm
-            const mmWidth = canvas.width * 0.264583;
-            const mmHeight = canvas.height * 0.264583;
-            
-            const { jsPDF } = jspdf;
-            const orientation = mmWidth > mmHeight ? 'l' : 'p';
-            const pdf = new jsPDF(orientation, 'mm', [mmWidth, mmHeight]);
-            
-            pdf.addImage(imgData, 'PNG', 0, 0, mmWidth, mmHeight);
-            pdf.save(`Portfolio_Analysis_${new Date().toISOString().split('T')[0]}.pdf`);
-        } else {
-            alert("PDF libraries not loaded. Please refresh.");
-        }
-    } catch (err) {
-        console.error("PDF Export failed", err);
-        alert("Failed to generate PDF.");
-    } finally {
-        // 6. Restore Styles
-        element.style.width = originalWidth;
-        element.style.margin = originalMargin;
-        
-        originalStyles.forEach((s) => {
-            const hEl = s.el as HTMLElement;
-            hEl.style.overflow = s.overflow;
-            hEl.style.width = s.width;
+        // 2. Add items to Shopify Cart via AJAX API
+        const response = await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: itemsToBuy })
         });
-        
-        setIsCapturing(false);
+
+        if (!response.ok) {
+            throw new Error("Failed to add items to cart");
+        }
+
+        // 3. Redirect to Checkout
+        window.location.href = '/checkout';
+
+    } catch (error) {
+        console.error("Checkout failed", error);
+        alert("There was an error proceeding to checkout. Please try again.");
+        setIsCheckingOut(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
       
-      {/* Loading Overlay */}
-      {isCapturing && (
-        <div className="fixed inset-0 z-[9999] bg-white/95 flex flex-col items-center justify-center backdrop-blur-sm">
-           <div className="flex flex-col items-center gap-4">
-               <Loader2 size={48} className="text-blue-600 animate-spin" />
-               <p className="font-semibold text-slate-600">Generating High-Res Report...</p>
-           </div>
-        </div>
-      )}
-
       <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 print:block print:p-0 print:max-w-none">
         
         {/* Sidebar - Hidden during Print */}
@@ -459,11 +399,11 @@ export default function App() {
                         </div>
                         <div>
                             <div className="flex justify-between items-center mb-1">
-                                <label className="block text-xs font-medium text-slate-500">Recurring Contribution</label>
+                                <label className="block text-xs font-medium text-slate-500">Recurring Cash Flow</label>
                                 <select 
                                     value={contributionFreq}
                                     onChange={(e) => setContributionFreq(e.target.value)}
-                                    className="text-[10px] bg-slate-100 border-none rounded px-2 py-0.5 text-slate-700 outline-none focus:ring-0 cursor-pointer"
+                                    className="text-xs bg-slate-100 border-none rounded px-2 py-1 text-slate-700 outline-none focus:ring-0 cursor-pointer"
                                 >
                                     <option value="monthly">Monthly</option>
                                     <option value="quarterly">Quarterly</option>
@@ -483,24 +423,12 @@ export default function App() {
                                 />
                             </div>
                             <p className="text-[10px] text-slate-400 mt-2 flex items-center gap-1">
-                                <Info size={10} /> Added at start of period.
+                                <Info size={10} /> Positive to add, negative to withdraw.
                             </p>
                         </div>
                     </div>
                 </div>
                 
-                <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
-                   <div className="flex items-start gap-2">
-                      <HelpCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />
-                      <div>
-                          <h4 className="text-xs font-bold text-blue-900 mb-1">Methodology: Target Allocation</h4>
-                          <p className="text-[10px] text-blue-800/80 leading-relaxed">
-                              Allocations simulate a <strong>daily rebalanced</strong> portfolio.
-                          </p>
-                      </div>
-                   </div>
-                </div>
-
                 <FileUpload onDataLoaded={handleUpload} />
 
                 <StrategyList 
@@ -538,7 +466,6 @@ export default function App() {
         {/* Report Section */}
         <section 
             id="report-content" 
-            ref={reportRef}
             className="lg:col-span-9 space-y-6 print:col-span-12 print:space-y-6"
         >
             
@@ -555,36 +482,6 @@ export default function App() {
                     </div>
                 </div>
             </div>
-            
-            {simulation && (
-                <div className="flex justify-end items-center gap-4 mb-2 print:hidden">
-                     <div className="flex flex-col items-end">
-                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Final Balance</span>
-                        <span className="font-bold text-slate-800 tabular-nums text-lg">
-                            ${simulation.stats.finalBalance.toLocaleString(undefined, {maximumFractionDigits:0})}
-                        </span>
-                     </div>
-                     <div className="flex flex-col items-end">
-                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">CAGR</span>
-                        <span className={`font-bold tabular-nums text-lg ${simulation.stats.cagr > 0 ? 'text-emerald-600' : 'text-slate-800'}`}>
-                            {(simulation.stats.cagr*100).toFixed(2)}%
-                        </span>
-                     </div>
-                     <div className="h-8 w-px bg-slate-200 mx-2"></div>
-                     
-                     <div className="flex items-center gap-2">
-                         <button 
-                            onClick={handleExportPDF}
-                            disabled={isCapturing}
-                            className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-lg transition-all shadow-md active:scale-95"
-                            title="Print or Save as PDF"
-                          >
-                            <Printer size={16} />
-                            <span className="hidden sm:inline">Save PDF</span>
-                          </button>
-                     </div>
-                </div>
-            )}
 
             {simulation ? (
                 <>
@@ -752,12 +649,25 @@ export default function App() {
                                         </div>
                                     </div>
                                     
-                                    <button className="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 group">
-                                        <span>Proceed to Checkout</span>
-                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    <button 
+                                        onClick={handleCheckout}
+                                        disabled={isCheckingOut}
+                                        className="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+                                    >
+                                        {isCheckingOut ? (
+                                            <>
+                                                <Loader2 size={18} className="animate-spin" />
+                                                <span>Processing...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>Proceed to Checkout</span>
+                                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
                                     </button>
                                      <p className="text-center text-[10px] text-slate-500 mt-3 flex items-center justify-center gap-1">
-                                        <Check size={10} /> Secure payment via Stripe. Instant access.
+                                        <Check size={10} /> Secure payment. Instant access.
                                     </p>
                                 </div>
                             </div>
