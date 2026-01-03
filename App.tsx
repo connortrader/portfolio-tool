@@ -326,42 +326,39 @@ export default function App() {
     return match ? match[1] : null;
   };
 
-  // Checkout Logic
+  // Checkout Logic - Updated to use postMessage for iframe communication
   const handleCheckout = async () => {
     setIsCheckingOut(true);
     
-    // 1. Prepare items for Shopify Cart
-    const itemsToBuy = pricedStrategies.map(s => {
-        const variantId = s.infoUrl ? extractVariantId(s.infoUrl) : null;
-        return {
-            id: variantId,
-            quantity: 1
-        };
-    }).filter(item => item.id); // Filter out strategies without variant ID
+    // 1. Prepare items for Shopify Cart (just IDs for the parent script)
+    const variantIds = pricedStrategies.map(s => {
+        return s.infoUrl ? extractVariantId(s.infoUrl) : null;
+    }).filter(id => id !== null);
 
-    if (itemsToBuy.length === 0) {
+    if (variantIds.length === 0) {
         alert("No strategies available for purchase.");
         setIsCheckingOut(false);
         return;
     }
 
     try {
-        // 2. Add items to Shopify Cart via AJAX API
-        const response = await fetch('/cart/add.js', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: itemsToBuy })
-        });
+        // 2. Send message to parent Shopify window
+        // The parent window must have the event listener to handle this:
+        // window.addEventListener('message', (e) => { if(e.data.type === 'ADD_TO_CART') ... })
+        window.parent.postMessage({
+            type: 'ADD_TO_CART',
+            variantIds: variantIds
+        }, '*');
 
-        if (!response.ok) {
-            throw new Error("Failed to add items to cart");
-        }
-
-        // 3. Redirect to Checkout
-        window.location.href = '/checkout';
+        // We reset the loading state after a delay because the parent window
+        // will ideally handle the redirect. If it doesn't, we stop spinning so
+        // the user knows something happened (or didn't).
+        setTimeout(() => {
+            setIsCheckingOut(false);
+        }, 3000);
 
     } catch (error) {
-        console.error("Checkout failed", error);
+        console.error("Checkout signaling failed", error);
         alert("There was an error proceeding to checkout. Please try again.");
         setIsCheckingOut(false);
     }
