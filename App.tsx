@@ -389,9 +389,9 @@ export default function App() {
   };
 
   return (
-    <div className="h-auto min-h-0 flex flex-col bg-slate-50 font-sans text-slate-900">
+    <div className="h-screen flex flex-col bg-slate-50 font-sans text-slate-900 overflow-hidden">
       
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 print:block print:p-0 print:max-w-none">
+      <main className="flex-1 w-full h-full max-w-[1600px] mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 print:block print:h-auto overflow-y-auto lg:overflow-hidden">
         
         {/* Sidebar - Hidden during Print */}
         <aside className="lg:col-span-3 print:hidden">
@@ -487,7 +487,7 @@ export default function App() {
         {/* Report Section */}
         <section 
             id="report-content" 
-            className="lg:col-span-9 flex flex-col gap-6 print:col-span-12"
+            className="lg:col-span-9 lg:h-full lg:overflow-y-auto custom-scrollbar flex flex-col gap-6 print:col-span-12 pb-20"
         >
             
             {/* Print Header (Visible only in Print) */}

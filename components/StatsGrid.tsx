@@ -25,8 +25,8 @@ export const StatsGrid: React.FC<{ stats: PortfolioStats, spyStats: PortfolioSta
     return (
         <div className="mb-8">
             <h3 className="text-lg font-bold text-slate-800 mb-4">Portfolio Performance Metrics</h3>
-            <div className="overflow-hidden rounded-lg border border-slate-200">
-                <table className="w-full text-sm text-left">
+            <div className="rounded-lg border border-slate-200 overflow-x-auto custom-scrollbar">
+                <table className="w-full min-w-max text-sm text-left">
                     <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
                         <tr>
                             <th className="px-4 py-3">Metric</th>
@@ -138,8 +138,8 @@ export const StressPeriodsTable: React.FC<{
             <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
                 Historical Market Stress Periods
             </h4>
-            <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full text-xs text-left border-collapse bg-white">
+            <div className="border border-slate-200 rounded-lg overflow-x-auto custom-scrollbar">
+                <table className="w-full min-w-max text-xs text-left border-collapse bg-white">
                     <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider">
                         <tr>
                             <th className="p-3 border-b border-slate-200">Event</th>
@@ -217,10 +217,10 @@ export const MonthlyTable: React.FC<{ stats: PortfolioStats }> = ({ stats }) => 
     const avgMaxDD = maxDDCount > 0 ? maxDDSum / maxDDCount : undefined;
 
     return (
-        <div className="mt-8 overflow-x-auto">
+        <div className="mt-8">
             <h4 className="text-sm font-bold text-slate-800 mb-4">Monthly Returns</h4>
-            <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full text-xs text-right border-collapse bg-white">
+            <div className="border border-slate-200 rounded-lg overflow-x-auto custom-scrollbar">
+                <table className="w-full min-w-max text-xs text-right border-collapse bg-white">
                     <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider">
                         <tr>
                             <th className="p-3 text-left font-semibold border-b border-slate-200">Year</th>
