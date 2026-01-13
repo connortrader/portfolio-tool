@@ -67,7 +67,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold text-slate-800">Allocations</h3>
-        <div className={`text-sm font-bold ${totalAllocation > 100 ? 'text-red-500' : totalAllocation === 100 ? 'text-emerald-600' : 'text-amber-500'}`}>
+        <div className="text-sm font-bold text-slate-800">
           {totalAllocation}%
         </div>
       </div>

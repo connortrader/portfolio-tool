@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { DollarSign, Info, ShoppingCart, Loader2, BarChart2, ArrowRight, Check, Tag } from 'lucide-react';
+import { DollarSign, Info, Loader2, BarChart2, ArrowRight, Check } from 'lucide-react';
 import { StrategyList } from './components/StrategyList';
 import { FileUpload } from './components/FileUpload';
 import { EquityChart, DrawdownChart, AnnualReturnsChart, AllocationPieChart } from './components/Charts';
@@ -294,27 +294,27 @@ export default function App() {
 
   let discount = 0;
   let nextTierMsg = "";
-  let bannerColorClass = "text-slate-400";
-  let bannerBgClass = "bg-slate-800";
+  let bannerColorClass = "text-slate-500";
+  let bannerBgClass = "bg-slate-50 border-slate-200";
 
   if (countForDiscount > 0) {
     if (countForDiscount < 4) {
         const needed = 4 - countForDiscount;
         discount = 0;
         nextTierMsg = `Add ${needed} more strategy${needed > 1 ? 'ies' : ''} to save 20%`;
-        bannerColorClass = "text-blue-300";
-        bannerBgClass = "bg-blue-900/40 border-blue-700/50";
+        bannerColorClass = "text-blue-600";
+        bannerBgClass = "bg-blue-50 border-blue-200";
     } else if (countForDiscount >= 4 && countForDiscount < 6) {
         discount = 0.20;
         const needed = 6 - countForDiscount;
         nextTierMsg = `20% Discount Active! Add ${needed} more to save 30%`;
-        bannerColorClass = "text-amber-300";
-        bannerBgClass = "bg-amber-900/40 border-amber-700/50";
+        bannerColorClass = "text-amber-700";
+        bannerBgClass = "bg-amber-50 border-amber-200";
     } else {
         discount = 0.30;
         nextTierMsg = "Maximum 30% Discount Unlocked! 🎉";
-        bannerColorClass = "text-emerald-300";
-        bannerBgClass = "bg-emerald-900/40 border-emerald-700/50";
+        bannerColorClass = "text-emerald-700";
+        bannerBgClass = "bg-emerald-50 border-emerald-200";
     }
   }
 
@@ -372,15 +372,15 @@ export default function App() {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-xs font-medium text-slate-500 mb-1">Starting Balance</label>
-                            <div className="flex items-center bg-slate-900 border border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-shadow shadow-inner overflow-hidden">
-                                <span className="pl-3 text-slate-400 text-xs select-none">$</span>
+                            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all overflow-hidden">
+                                <span className="pl-3 text-slate-500 text-xs select-none">$</span>
                                 <input 
                                     type="number" 
                                     value={initialBalanceStr}
                                     onChange={(e) => setInitialBalanceStr(e.target.value)}
                                     onFocus={(e) => e.target.value === '0' && setInitialBalanceStr('')}
                                     onBlur={(e) => e.target.value === '' && setInitialBalanceStr('0')}
-                                    className="w-full pl-1 pr-3 py-2 bg-transparent border-none focus:ring-0 text-sm tabular-nums text-white placeholder-slate-500 outline-none"
+                                    className="w-full pl-1 pr-3 py-2 bg-transparent border-none focus:ring-0 text-sm tabular-nums text-slate-900 placeholder-slate-400 outline-none"
                                 />
                             </div>
                         </div>
@@ -390,7 +390,7 @@ export default function App() {
                                 <select 
                                     value={contributionFreq}
                                     onChange={(e) => setContributionFreq(e.target.value)}
-                                    className="text-xs bg-slate-100 border-none rounded px-2 py-1 text-slate-700 outline-none focus:ring-0 cursor-pointer"
+                                    className="text-xs bg-slate-50 border border-slate-200 rounded px-2 py-1 text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                                 >
                                     <option value="monthly">Monthly</option>
                                     <option value="quarterly">Quarterly</option>
@@ -398,15 +398,15 @@ export default function App() {
                                     <option value="annually">Annually</option>
                                 </select>
                             </div>
-                            <div className="flex items-center bg-slate-900 border border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-shadow shadow-inner overflow-hidden">
-                                <span className="pl-3 text-slate-400 text-xs select-none">$</span>
+                            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all overflow-hidden">
+                                <span className="pl-3 text-slate-500 text-xs select-none">$</span>
                                 <input 
                                     type="number" 
                                     value={monthlyContributionStr}
                                     onChange={(e) => setMonthlyContributionStr(e.target.value)}
                                     onFocus={(e) => e.target.value === '0' && setMonthlyContributionStr('')}
                                     onBlur={(e) => e.target.value === '' && setMonthlyContributionStr('0')}
-                                    className="w-full pl-1 pr-3 py-2 bg-transparent border-none focus:ring-0 text-sm tabular-nums text-white placeholder-slate-500 outline-none"
+                                    className="w-full pl-1 pr-3 py-2 bg-transparent border-none focus:ring-0 text-sm tabular-nums text-slate-900 placeholder-slate-400 outline-none"
                                 />
                             </div>
                             <p className="text-[10px] text-slate-400 mt-2 flex items-center gap-1">
@@ -453,7 +453,7 @@ export default function App() {
         {/* Report Section */}
         <section 
             id="report-content" 
-            className="lg:col-span-9 space-y-6 print:col-span-12 print:space-y-6"
+            className="lg:col-span-9 flex flex-col gap-6 print:col-span-12"
         >
             
             {/* Print Header (Visible only in Print) */}
@@ -581,13 +581,12 @@ export default function App() {
                          </div>
                     </div>
                     
-                    {/* Cost Section - New Buying Area */}
+                    {/* Cost Section - New Buying Area (Light Mode) */}
                     {originalPrice > 0 && (
-                        <div className="bg-slate-900 rounded-xl shadow-xl overflow-hidden print:hidden mt-8 border border-slate-700">
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print:hidden mt-8">
                             {/* Header / Upsell Banner */}
-                            <div className={`${bannerBgClass} ${bannerColorClass} px-6 py-3 text-sm font-semibold flex items-center justify-between border-b border-white/5`}>
+                            <div className={`${bannerBgClass} ${bannerColorClass} px-6 py-3 text-sm font-semibold flex items-center justify-between border-b`}>
                                 <div className="flex items-center gap-2">
-                                    <Tag size={16} />
                                     <span>{countForDiscount} Paid Strateg{countForDiscount === 1 ? 'y' : 'ies'} Selected</span>
                                 </div>
                                 <span className="flex items-center gap-2">
@@ -599,38 +598,37 @@ export default function App() {
                             <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
                                 {/* Left: Selected Items List */}
                                 <div className="md:col-span-2 space-y-4">
-                                     <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                                        <ShoppingCart className="text-blue-500" size={20}/>
+                                     <h3 className="text-slate-800 font-bold text-lg flex items-center gap-2">
                                         Your Selection
                                      </h3>
-                                     <div className="bg-slate-800/50 rounded-lg p-4 space-y-3 max-h-[200px] overflow-y-auto custom-scrollbar border border-white/5">
+                                     <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
                                         {pricedStrategies.map(s => (
                                             <div key={s.id} className="flex justify-between items-center text-sm">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-2 h-2 rounded-full" style={{backgroundColor: s.color}}></div>
-                                                    <span className="text-slate-200 font-medium">{s.name}</span>
+                                                    <span className="text-slate-700 font-medium">{s.name}</span>
                                                 </div>
-                                                <span className="text-slate-400 tabular-nums">${s.price}</span>
+                                                <span className="text-slate-500 tabular-nums">${s.price}</span>
                                             </div>
                                         ))}
                                      </div>
                                 </div>
 
                                 {/* Right: Totals & Action */}
-                                <div className="flex flex-col justify-between bg-slate-800/30 rounded-lg p-5 border border-white/5">
+                                <div className="flex flex-col justify-between bg-slate-50 border border-slate-200 rounded-lg p-5">
                                     <div className="space-y-3">
-                                        <div className="flex justify-between text-slate-400 text-sm">
+                                        <div className="flex justify-between text-slate-500 text-sm">
                                             <span>Subtotal</span>
                                             <span className="tabular-nums">${originalPrice.toLocaleString()}</span>
                                         </div>
                                         {discount > 0 && (
-                                            <div className="flex justify-between text-emerald-400 text-sm font-medium">
+                                            <div className="flex justify-between text-emerald-600 text-sm font-medium">
                                                 <span>Discount ({(discount*100).toFixed(0)}%)</span>
                                                 <span className="tabular-nums">-${Math.round(originalPrice * discount).toLocaleString()}</span>
                                             </div>
                                         )}
-                                        <div className="h-px bg-white/10 my-2"></div>
-                                        <div className="flex justify-between text-white text-xl font-bold">
+                                        <div className="h-px bg-slate-200 my-2"></div>
+                                        <div className="flex justify-between text-slate-900 text-xl font-bold">
                                             <span>Total</span>
                                             <span className="tabular-nums">${Math.round(finalPrice).toLocaleString()}</span>
                                         </div>
@@ -639,7 +637,7 @@ export default function App() {
                                     <button 
                                         onClick={handleCheckout}
                                         disabled={isCheckingOut}
-                                        className="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+                                        className="w-full mt-6 bg-[#004cff] hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
                                     >
                                         {isCheckingOut ? (
                                             <>

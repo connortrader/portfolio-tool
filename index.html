@@ -50,6 +50,16 @@
         border-radius: 4px;
       }
 
+      /* Hide number input spinners */
+      input[type=number]::-webkit-inner-spin-button, 
+      input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+
       /* PRINT STYLES */
       @media print {
         @page {
@@ -136,6 +146,5 @@
 </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script> 
   </body>
 </html>
