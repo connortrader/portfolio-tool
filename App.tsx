@@ -32,6 +32,40 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   
+  // Shopify iFrame Resizer Logic
+  useEffect(() => {
+    const sendHeight = () => {
+      const root = document.getElementById('root');
+      if (root) {
+        // Add a small buffer to prevent cut-off
+        const height = root.scrollHeight;
+        window.parent.postMessage({ type: 'resize', height }, '*');
+      }
+    };
+
+    // 1. Initial Send
+    sendHeight();
+
+    // 2. Observer for content/DOM changes
+    const observer = new MutationObserver(sendHeight);
+    const root = document.getElementById('root');
+    if (root) {
+      observer.observe(root, { attributes: true, childList: true, subtree: true });
+    }
+
+    // 3. Window resize listener
+    window.addEventListener('resize', sendHeight);
+    
+    // 4. Periodic check (catches animations or delayed rendering)
+    const interval = setInterval(sendHeight, 1000);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', sendHeight);
+      clearInterval(interval);
+    };
+  }, []);
+
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
@@ -355,13 +389,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
+    <div className="h-auto min-h-0 flex flex-col bg-slate-50 font-sans text-slate-900">
       
       <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 print:block print:p-0 print:max-w-none">
         
         {/* Sidebar - Hidden during Print */}
         <aside className="lg:col-span-3 print:hidden">
-            <div className="sticky top-6 space-y-6 max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar pr-1">
+            <div className="space-y-6 pr-1">
                 
                 {/* Capital Settings */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
@@ -660,7 +694,7 @@ export default function App() {
                     )}
                 </>
             ) : (
-                <div className="h-[60vh] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
                     <div className="bg-white p-4 rounded-full shadow-sm mb-4">
                         <Info size={32} className="text-blue-500" />
                     </div>
