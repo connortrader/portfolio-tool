@@ -282,7 +282,7 @@ export const AnnualReturnsChart: React.FC<{portfolioReturns: Record<string, numb
                     <XAxis dataKey="year" stroke="#94a3b8" tick={{fontSize: 11}} />
                     <YAxis stroke="#94a3b8" tick={{fontSize: 11}} tickFormatter={(val) => `${val}%`} />
                     <Tooltip 
-                        cursor={{fill: '#f8fafc'}}
+                        cursor={{fill: '#f5f5f5'}}
                         contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }}
                         formatter={(value: number) => `${value.toFixed(1)}%`}
                     />

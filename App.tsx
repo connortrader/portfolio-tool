@@ -395,7 +395,7 @@ export default function App() {
         
         {/* Sidebar - Hidden during Print */}
         <aside className="lg:col-span-3 print:hidden">
-            <div className="space-y-6 pr-1">
+            <div className="sticky top-6 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar space-y-6 pr-1 pb-4">
                 
                 {/* Capital Settings */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
