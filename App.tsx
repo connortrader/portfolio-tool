@@ -143,17 +143,34 @@ export default function App() {
         loadData();
     }, []);
 
-    // pSEO: Handle URL Parameters (?strat=Name1,Name2&weights=50,50)
+        // pSEO: Vali strateegiad URL-i põhjal (töötab ka iframe-is)
     useEffect(() => {
         if (!loading && strategies.length > 0) {
-            const params = new URLSearchParams(window.location.search);
+            // 1. Vaatame, kas parameetrid on iframe-i enda URL-is
+            let params = new URLSearchParams(window.location.search);
+            
+            // 2. Kui parameetreid pole, proovime vaadata Shopify (parent) akent
+            if (!params.has('strat')) {
+                try {
+                    if (window.self !== window.top) {
+                        const parentParams = new URLSearchParams(window.top.location.search);
+                        if (parentParams.has('strat')) {
+                            params = parentParams;
+                            console.log('pSEO: Leidsin parameetrid Shopify URL-ist');
+                        }
+                    }
+                } catch (e) {
+                    // CORS blokeering (tavaline), sel juhul peame sammu 2 kasutama
+                    console.log('pSEO: Parent URL-ile ei pääse ligi, ootan parameetreid iframe src-st');
+                }
+            }
+
             const stratParam = params.get('strat');
             const weightsParam = params.get('weights');
 
             if (stratParam && weightsParam) {
                 const stratNames = stratParam.split(',').map(s => decodeURIComponent(s.trim()).toLowerCase());
                 const weightValues = weightsParam.split(',').map(Number);
-                
                 const newAllocations: Record<string, number> = {};
                 
                 stratNames.forEach((name, idx) => {
@@ -165,7 +182,7 @@ export default function App() {
 
                 if (Object.keys(newAllocations).length > 0) {
                     setAllocations(newAllocations);
-                    console.log('pSEO: Applied allocations from URL', newAllocations);
+                    console.log('pSEO: Rakendatud seaded:', newAllocations);
                 }
             }
         }
